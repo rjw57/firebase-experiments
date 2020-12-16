@@ -1,6 +1,6 @@
 root=true
 
-[*.{js,jsx,html,css,ts,tsx}]
+[*.{js,jsx,html,css,ts,tsx,tf,json}]
 indent_style=space
 indent_size=2
 max_line_length=99

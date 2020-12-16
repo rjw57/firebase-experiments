@@ -9,4 +9,14 @@ locals {
 
   # Billing account for project
   billing_account = "01B0CE-083E92-D6CDAA"
+
+  # Services which need to be enabled
+  enabled_services = toset([
+    "cloudbuild.googleapis.com",
+    "cloudfunctions.googleapis.com",
+    "firebase.googleapis.com",
+    "logging.googleapis.com",
+    "monitoring.googleapis.com",
+    "storage.googleapis.com",
+  ])
 }
