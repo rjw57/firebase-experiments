@@ -37,6 +37,7 @@ export const ChatInput = ({ onNewMessage, ...toolbarProps }: ChatInputProps) => 
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
+    onNewMessage && onNewMessage(message);
     setMessage('');
   };
 

@@ -4,5 +4,16 @@ service cloud.firestore {
     match /{document=**} {
       allow read, write: if false;
     }
+
+    match /messages/{id} {
+      allow read: if request.auth.uid != null;
+      allow create: if canCreateMessage();
+    }
+
+    function canCreateMessage() {
+      let isSignedIn = request.auth.uid != null;
+      let isOwner = request.auth.uid == request.resource.data.uid;
+      return isSignedIn && isOwner;
+    }
   }
 }
