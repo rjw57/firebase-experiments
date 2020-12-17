@@ -1,19 +1,16 @@
 /**
  * Avatar for Firebase user. Profile image is displayed if possible.
  */
-import {
-  Avatar, AvatarProps
-} from '@material-ui/core';
-import firebase from 'firebase/app';
+import { ComponentProps } from 'react';
+import { Avatar } from '@material-ui/core';
 
-export interface UserAvatarProps extends AvatarProps {
-  user: firebase.User;
+export interface UserAvatarProps extends ComponentProps<typeof Avatar> {
+  displayName: string;
+  photoURL?: string;
 };
 
-export const UserAvatar = ({ user, ...otherProps }: UserAvatarProps) => (
-  <Avatar
-    src={ user.photoURL || undefined } alt={ user.displayName || undefined }
-  />
+export const UserAvatar = ({ displayName, photoURL, ...otherProps }: UserAvatarProps) => (
+  <Avatar src={photoURL} alt={displayName} {...otherProps} />
 );
 
 export default UserAvatar;

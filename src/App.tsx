@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Box,
   CircularProgress,
@@ -20,6 +20,7 @@ import HideOnScroll from './HideOnScroll';
 import Message from './Message';
 import SignIn from './SignIn';
 import TimeBar from './TimeBar';
+import UserContainer from './UserContainer';
 
 interface MessageDoc {
   uid?: string;
@@ -38,6 +39,7 @@ const App = () => {
 
   const [ user, loading ] = useAuthState(firebase.auth());
   const [ messagesSnapshot ] = useCollection(query);
+  const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 
   const handleSignOut = () => { firebase.auth().signOut(); };
   const handleNewMessage = async (message: string) => {
@@ -67,6 +69,12 @@ const App = () => {
   }).map((doc: firebase.firestore.QueryDocumentSnapshot<MessageDoc>) => ({
     id: doc.id, ...doc.data()
   } as CleanedMessageDoc));
+
+  // If the messages ever change, scroll the latest one into view.
+  const finalMessageDoc = messageDocs.length > 0 ? messageDocs[messageDocs.length-1].id : null;
+  useEffect(() => {
+    endOfMessagesRef.current && endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+  }, [finalMessageDoc]);
 
   // Group by messages when the difference is >thresholdMillis.
   const thresholdMillis = 10 * 60 * 1000;
@@ -131,23 +139,28 @@ const App = () => {
               {
                 groupedByTimestampAndUser.map(timestampGroup => (
                   <div key={timestampGroup[0][0].createdAt.toMillis()}>
-                    <TimeBar date={timestampGroup[0][0].createdAt.toDate()} />
+                    <Box my={2}><TimeBar date={timestampGroup[0][0].createdAt.toDate()} /></Box>
                     {
                       timestampGroup.map((userGroup, index) => (
-                        <div key={`${timestampGroup[0][0].createdAt.toMillis()}-${userGroup[0].uid}-${index}`}>
-                          <div>{ userGroup[0].displayName }</div>
-                          {
-                            userGroup.map(({ id, message }) => (
-                              <Message key={id} message={message} />
-                            ))
-                          }
-                        </div>
+                        <Box my={2} key={`${userGroup[0].uid}-${index}`}>
+                          <UserContainer
+                            displayName={userGroup[0].displayName}
+                            photoURL={userGroup[0].photoURL}
+                          >
+                            {
+                              userGroup.map(({ id, message }) => (
+                                <Message key={id} message={message} />
+                              ))
+                            }
+                          </UserContainer>
+                        </Box>
                       ))
                     }
                   </div>
                 ))
               }
             </Box>
+            <div ref={endOfMessagesRef} />
           </Container>
           <Toolbar />
           <BottomBox>

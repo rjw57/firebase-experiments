@@ -63,7 +63,7 @@ export const AppBar = forwardRef(({
             color="inherit"
             ref={iconButtonEl}
           >
-            <UserAvatar user={user} />
+            <UserAvatar displayName={user.displayName || ''} photoURL={user.photoURL || undefined} />
           </IconButton>
           <Menu
             id="account-menu-appbar"
