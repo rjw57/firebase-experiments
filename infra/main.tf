@@ -2,13 +2,25 @@
 
 # Enable firebase functionality in the given project.
 resource "google_firebase_project" "default" {
-  project  = google_project.default.project_id
   provider = google-beta
+}
+
+# Default location for firebase resources.
+resource "google_firebase_project_location" "default" {
+  location_id = local.default_region
+
+  provider = google-beta
+  depends_on = [
+    google_firebase_project.default
+  ]
 }
 
 # A webapp in the firebase project
 resource "google_firebase_web_app" "default" {
-  project      = google_firebase_project.default.project
   display_name = "Experiments"
-  provider     = google-beta
+
+  provider = google-beta
+  depends_on = [
+    google_firebase_project_location.default,
+  ]
 }
