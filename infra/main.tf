@@ -24,3 +24,9 @@ resource "google_firebase_web_app" "default" {
     google_firebase_project_location.default,
   ]
 }
+
+# App config for the default webapp
+data "google_firebase_web_app_config" "default" {
+  web_app_id = google_firebase_web_app.default.app_id
+  provider   = google-beta
+}
