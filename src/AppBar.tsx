@@ -22,6 +22,8 @@ import UserAvatar from './UserAvatar';
 export interface AppBarProps extends MuiAppBarProps {
   user: firebase.User | null;
 
+  showUser?: boolean;
+
   onSignIn?: () => void;
   onSignOut?: () => void;
 };
@@ -40,7 +42,9 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-export const AppBar = React.forwardRef(({ user, onSignIn, onSignOut, ...appBarProps }: AppBarProps, ref) => {
+export const AppBar = React.forwardRef(({
+  user, showUser = true, onSignIn, onSignOut, ...appBarProps
+}: AppBarProps, ref) => {
   const classes = useStyles(appBarProps);
   const iconButtonEl = React.useRef<null | HTMLButtonElement>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -53,7 +57,7 @@ export const AppBar = React.forwardRef(({ user, onSignIn, onSignOut, ...appBarPr
     <Toolbar>
       <Typography variant="h6" className={classes.title}>Hello</Typography>
       {
-        user && !user.isAnonymous && <>
+        showUser && user && !user.isAnonymous && <>
           <IconButton
             edge="end"
             aria-controls="account-menu-appbar"
@@ -87,7 +91,7 @@ export const AppBar = React.forwardRef(({ user, onSignIn, onSignOut, ...appBarPr
         </>
       }
       {
-        (!user || user.isAnonymous) && <>
+        showUser && (!user || user.isAnonymous) && <>
           <Button color="inherit" onClick={onSignIn}>
             Sign in
           </Button>

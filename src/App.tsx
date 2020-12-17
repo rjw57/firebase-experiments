@@ -7,20 +7,27 @@ import {
   Typography,
 } from '@material-ui/core';
 import firebase from 'firebase/app';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 import AppBar from './AppBar';
-import FirebaseContext from './FirebaseContext';
 import HideOnScroll from './HideOnScroll';
 
 const App = () => {
-  const { authProvider, user } = React.useContext(FirebaseContext);
+  const [ user, loading ] = useAuthState(firebase.auth());
+  const authProvider = React.useMemo(() => {
+    const authProvider = new firebase.auth.GoogleAuthProvider();
+    authProvider.addScope('profile');
+    authProvider.setCustomParameters({hd: 'cam.ac.uk', prompt: 'select_account'});
+    return authProvider;
+  }, []);
+
   const handleSignIn = () => { firebase.auth().signInWithRedirect(authProvider); };
   const handleSignOut = () => { firebase.auth().signOut(); };
 
   return <>
     <CssBaseline />
     <HideOnScroll>
-      <AppBar user={user} onSignIn={handleSignIn} onSignOut={handleSignOut}>
+      <AppBar showUser={!loading} user={user} onSignIn={handleSignIn} onSignOut={handleSignOut}>
         <Toolbar>
           <Typography variant="h6">Experimental app</Typography>
         </Toolbar>

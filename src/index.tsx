@@ -1,16 +1,19 @@
+import firebase from 'firebase/app';
+import 'firebase/auth';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import firebaseAppConfig from './firebaseAppConfig';
 
-import { FirebaseProvider } from './FirebaseContext';
+// Initialise firebase
+firebase.initializeApp(firebaseAppConfig);
+firebase.auth().useDeviceLanguage();
 
 ReactDOM.render(
   <React.StrictMode>
-    <FirebaseProvider>
-      <App />
-    </FirebaseProvider>
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );
