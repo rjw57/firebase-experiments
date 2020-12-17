@@ -1,9 +1,11 @@
-import * as React from 'react';
-
+import {
+  forwardRef,
+  useRef,
+  useState,
+} from 'react';
 import {
   AppBar as MuiAppBar,
   AppBarProps as MuiAppBarProps,
-  Button,
   IconButton,
   Menu,
   MenuItem,
@@ -20,11 +22,8 @@ import firebase from 'firebase/app';
 import UserAvatar from './UserAvatar';
 
 export interface AppBarProps extends MuiAppBarProps {
-  user: firebase.User | null;
+  user?: firebase.User | null;
 
-  showUser?: boolean;
-
-  onSignIn?: () => void;
   onSignOut?: () => void;
 };
 
@@ -33,21 +32,18 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       flexGrow: 1,
     },
-    menuButton: {
-      marginRight: theme.spacing(2),
-    },
     title: {
       flexGrow: 1,
     },
   }),
 );
 
-export const AppBar = React.forwardRef(({
-  user, showUser = true, onSignIn, onSignOut, ...appBarProps
+export const AppBar = forwardRef(({
+  user, onSignOut, ...appBarProps
 }: AppBarProps, ref) => {
   const classes = useStyles(appBarProps);
-  const iconButtonEl = React.useRef<null | HTMLButtonElement>(null);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const iconButtonEl = useRef<null | HTMLButtonElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   const handleMenu = () => { setAnchorEl(iconButtonEl.current); };
@@ -55,9 +51,9 @@ export const AppBar = React.forwardRef(({
 
   return <MuiAppBar ref={ref} classes={{...appBarProps.classes, root: classes.root}} {...appBarProps}>
     <Toolbar>
-      <Typography variant="h6" className={classes.title}>Hello</Typography>
+      <Typography variant="h6" className={classes.title}>Rubbish Chat</Typography>
       {
-        showUser && user && !user.isAnonymous && <>
+        user && !user.isAnonymous && <>
           <IconButton
             edge="end"
             aria-controls="account-menu-appbar"
@@ -88,13 +84,6 @@ export const AppBar = React.forwardRef(({
               Sign out
             </MenuItem>
           </Menu>
-        </>
-      }
-      {
-        showUser && (!user || user.isAnonymous) && <>
-          <Button color="inherit" onClick={onSignIn}>
-            Sign in
-          </Button>
         </>
       }
     </Toolbar>
