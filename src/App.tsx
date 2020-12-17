@@ -17,8 +17,9 @@ import AppBar from './AppBar';
 import BottomBox from './BottomBox';
 import ChatInput from './ChatInput';
 import HideOnScroll from './HideOnScroll';
-import SignIn from './SignIn';
 import Message from './Message';
+import SignIn from './SignIn';
+import TimeBar from './TimeBar';
 
 interface MessageDoc {
   uid?: string;
@@ -48,13 +49,55 @@ const App = () => {
     await messagesRef.add(doc);
   };
 
+  interface CleanedMessageDoc {
+    id: string;
+    message: string;
+    uid: string;
+    displayName: string;
+    photoURL?: string;
+    createdAt: firebase.firestore.Timestamp;
+  }
+
   // Filter messages to only those with message, displayName, uid and createdAt set.
-  const messageDocs = (
+  const messageDocs: Array<CleanedMessageDoc> = (
     messagesSnapshot ? messagesSnapshot.docs : []
   ).filter((doc: firebase.firestore.QueryDocumentSnapshot<MessageDoc>) => {
     const { message, displayName, uid, createdAt } = doc.data();
     return !!message && !!displayName && !!uid && !!createdAt;
-  });
+  }).map((doc: firebase.firestore.QueryDocumentSnapshot<MessageDoc>) => ({
+    id: doc.id, ...doc.data()
+  } as CleanedMessageDoc));
+
+  // Group by messages when the difference is >thresholdMillis.
+  const thresholdMillis = 10 * 60 * 1000;
+  const groupedByTimestamp = messageDocs.reduce(
+    (accumulator: Array<Array<CleanedMessageDoc>>, doc) => {
+      if(!accumulator || accumulator.length === 0) { return [[doc]]; }
+      const head = accumulator.slice(0, accumulator.length-1);
+      const tail = accumulator[accumulator.length - 1];
+      const t1 = tail[0].createdAt.toMillis();
+      const t2 = doc.createdAt.toMillis();
+      if(t2 - t1 < thresholdMillis) {
+        return [...head, [...tail, doc]];
+      } else {
+        return [...head, tail, [doc]];
+      }
+    }, [] as Array<Array<CleanedMessageDoc>>
+  );
+
+  // For each group, group by uid.
+  const groupedByTimestampAndUser = groupedByTimestamp.map(group => group.reduce(
+    (accumulator: Array<Array<CleanedMessageDoc>>, doc) => {
+      if(!accumulator || accumulator.length === 0) { return [[doc]]; }
+      const head = accumulator.slice(0, accumulator.length-1);
+      const tail = accumulator[accumulator.length - 1];
+      if(tail[0].uid === doc.uid) {
+        return [...head, [...tail, doc]];
+      } else {
+        return [...head, tail, [doc]]
+      }
+    }, [] as Array<Array<CleanedMessageDoc>>
+  ));
 
   return <>
     <CssBaseline />
@@ -86,16 +129,23 @@ const App = () => {
           <Container>
             <Box my={2}>
               {
-                messageDocs.map((
-                  doc: firebase.firestore.QueryDocumentSnapshot<MessageDoc>
-                ) => {
-                  const { message } = doc.data();
-                  if(!message) { return null; }
-                  return <Message
-                    key={doc.id}
-                    message={message}
-                  />;
-                })
+                groupedByTimestampAndUser.map(timestampGroup => (
+                  <div key={timestampGroup[0][0].createdAt.toMillis()}>
+                    <TimeBar date={timestampGroup[0][0].createdAt.toDate()} />
+                    {
+                      timestampGroup.map((userGroup, index) => (
+                        <div key={`${timestampGroup[0][0].createdAt.toMillis()}-${userGroup[0].uid}-${index}`}>
+                          <div>{ userGroup[0].displayName }</div>
+                          {
+                            userGroup.map(({ id, message }) => (
+                              <Message key={id} message={message} />
+                            ))
+                          }
+                        </div>
+                      ))
+                    }
+                  </div>
+                ))
               }
             </Box>
           </Container>
