@@ -7,7 +7,7 @@ import React from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 
-import firebaseConfig from './firebaseConfig';
+import firebaseAppConfig from './firebaseAppConfig';
 
 export interface IFirebaseContext {
   authProvider: firebase.auth.GoogleAuthProvider;
@@ -21,7 +21,7 @@ export interface IFirebaseContext {
 }
 
 if(!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseAppConfig);
 }
 
 const authProvider = new firebase.auth.GoogleAuthProvider();

@@ -30,3 +30,19 @@ data "google_firebase_web_app_config" "default" {
   web_app_id = google_firebase_web_app.default.app_id
   provider   = google-beta
 }
+
+# App config in src/ directory
+resource "local_file" "app_config" {
+  filename = "${path.module}/../src/firebaseAppConfig.json"
+
+  content = jsonencode({
+    appId             = google_firebase_web_app.default.app_id
+    apiKey            = data.google_firebase_web_app_config.default.api_key
+    authDomain        = data.google_firebase_web_app_config.default.auth_domain
+    databaseURL       = lookup(data.google_firebase_web_app_config.default, "database_url", "")
+    storageBucket     = lookup(data.google_firebase_web_app_config.default, "storage_bucket", "")
+    messagingSenderId = lookup(data.google_firebase_web_app_config.default, "messaging_sender_id", "")
+    measurementId     = lookup(data.google_firebase_web_app_config.default, "measurement_id", "")
+    projectId         = google_firebase_web_app.default.project
+  })
+}
