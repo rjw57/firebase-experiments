@@ -46,3 +46,14 @@ resource "local_file" "app_config" {
     projectId         = google_firebase_web_app.default.project
   })
 }
+
+# Firebase CLI configuration
+resource "local_file" "firebase_cli_config" {
+  filename = "${path.module}/../.firebaserc"
+
+  content = jsonencode({
+    projects = {
+      default = "experiments-cfec3"
+    }
+  })
+}
