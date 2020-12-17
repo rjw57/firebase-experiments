@@ -53,7 +53,7 @@ resource "local_file" "firebase_cli_config" {
 
   content = jsonencode({
     projects = {
-      default = "experiments-cfec3"
+      default = google_firebase_web_app.default.project
     }
   })
 }
