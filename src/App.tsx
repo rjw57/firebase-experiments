@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Box,
+  CircularProgress,
   Container,
   CssBaseline,
   Toolbar,
@@ -11,6 +12,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 
 import AppBar from './AppBar';
 import HideOnScroll from './HideOnScroll';
+import SignIn from './SignIn';
 
 const App = () => {
   const [ user, loading ] = useAuthState(firebase.auth());
@@ -36,17 +38,28 @@ const App = () => {
     <Toolbar />
     <Container>
       <Box my={2}>
-        <Typography>Hello</Typography>
-        <Typography>
-          {[...new Array(120)]
-            .map(
-              () => `Cras mattis consectetur purus sit amet fermentum.
-Cras justo odio, dapibus ac facilisis in, egestas eget quam.
-Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`,
-            )
-            .join('\n')}
-        </Typography>
+        {
+          loading && <div style={{textAlign: 'center'}}><CircularProgress /></div>
+        }
+        {
+          !loading && (!user || user.isAnonymous) && (
+            <SignIn onSignIn={handleSignIn} />
+          )
+        }
+        {
+          !loading && user && !user.isAnonymous && (
+            <Typography>
+              {[...new Array(120)]
+                .map(
+                  () => `Cras mattis consectetur purus sit amet fermentum.
+    Cras justo odio, dapibus ac facilisis in, egestas eget quam.
+    Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+    Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`,
+                )
+                .join('\n')}
+            </Typography>
+          )
+        }
       </Box>
     </Container>
   </>;
